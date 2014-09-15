@@ -1,8 +1,10 @@
+require_dependency 'clam/redmine/models/attachment_patch'
+
 Redmine::Plugin.register :clam do
   name 'Clam plugin'
-  author 'Author name'
-  description 'This is a plugin for Redmine'
+  author 'Mark David Dumlao'
+  description 'Plugin that provides a clamd scanner for file attachments'
   version '0.0.1'
-  url 'http://example.com/path/to/plugin'
-  author_url 'http://example.com/about'
+  url 'http://github.com/madumlao/redmine_clam'
+  author_url 'http://madumlao.is-a-geek.org'
 end
