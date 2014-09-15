@@ -1,3 +1,10 @@
-= clam
+= redmine_clam
 
-Description goes here
+redmine_clam is a plugin for scanning attachments with using clamav. It adds a filter that automatically scans all attachments upon upload / update and deletes any found viruses. It also adds a rake task that allows you to scan the whole attachments directory on a periodic basis and deletes any found viruses.
+
+redmine_clam is based on ClamAV::Client[https://github.com/franckverrot/clamav-client] and uses clamd as the scanning backend.
+
+== Rake task
+
+    rake redmine:attachments:clamdscan
+
