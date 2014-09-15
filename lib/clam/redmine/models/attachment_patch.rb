@@ -16,6 +16,14 @@ module AttachmentPatch
       unless @@scanner.present?
         @@scanner = ClamAV::Client.new
       end
+      
+      # new connection if connection dies
+      begin
+        @@scanner.execute(ClamAV::Commands::PingCommand.new)
+      rescue
+        @@scanner = ClamAV::Client.new
+      end
+      
       return @@scanner
     end
     
