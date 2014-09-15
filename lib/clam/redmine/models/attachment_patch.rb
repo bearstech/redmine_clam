@@ -6,6 +6,8 @@ module AttachmentPatch
     base.send :include, InstanceMethods
     base.class_eval do
       unloadable
+      
+      before_update :remove_virus!
     end
   end
   
@@ -66,11 +68,9 @@ module AttachmentPatch
       results = virus?
       return nil unless results.present?
       timestamp = DateTime.now.strftime('%Y-%m-%d %H:%M:%S')
-      self.filename = "[DELETED:#{results.virus_name}] #{filename}"
       File.delete diskfile
-      self.save!
-      self.reload
-      return self
+      @filename = "[DELETED:#{results.virus_name}]_#{filename}"
+      self.filename = "[DELETED:#{results.virus_name}]_#{filename}"
     end
   end
 end
