@@ -1,6 +1,6 @@
-require_dependency 'clam/redmine/models/attachment_patch'
+require_relative './lib/attachment_patch'
 
-Redmine::Plugin.register :clam do
+Redmine::Plugin.register :redmine_clam do
   name 'Clam plugin'
   author 'Mark David Dumlao'
   description 'Plugin that provides a clamd scanner for file attachments'
