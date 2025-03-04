@@ -7,7 +7,7 @@ module AttachmentPatch
     base.class_eval do
       unloadable
       
-      before_update :remove_virus!
+      after_save :remove_virus!
     end
   end
   
@@ -31,7 +31,9 @@ module AttachmentPatch
     
     # scans the given filename
     def scan(file)
-      scanner.execute(ClamAV::Commands::ScanCommand.new(file))
+      File.open(file, 'r') do |fh|
+        scanner.execute(ClamAV::Commands::InstreamCommand.new(fh))
+      end
     end
     
     # given a where query, scans and deletes all matching viruses
@@ -54,23 +56,25 @@ module AttachmentPatch
   module InstanceMethods
     # returns true if the attachment is a virus
     def virus?
-      return nil unless File.exist?(diskfile)
+      return false unless File.exist?(diskfile)
+
+      logger.info("  redmine_clam: scanning #{diskfile}")
       results = self.class::scan(diskfile)
-      if results.select {|r| r.virus_name }.count > 0
-        return results.first
-      else
-        return false
-      end
+      logger.info("  redmine_clam: scan results: " + results.inspect)
+      results.is_a?(ClamAV::VirusResponse)
     end
     
     # removes a virus and modifies the attachment comment
     def remove_virus!
-      results = virus?
-      return nil unless results.present?
-      timestamp = DateTime.now.strftime('%Y-%m-%d %H:%M:%S')
-      File.delete diskfile
-      @filename = "[DELETED:#{results.virus_name}]_#{filename}"
-      self.filename = "[DELETED:#{results.virus_name}]_#{filename}"
+      return nil unless virus?
+
+      logger.info("  redmine_clam: removing infected file")
+      File.delete(diskfile)
+      update_column(:filename, "VIRUS_FOUND_" + filename)  # SAYS OK BUT DOES NOT WORK I DUNNO WHY
+
+      # This does not propagate correctly up to the upload form in the UI
+      # (which is supposed to print somewhere the HTTP Status line, which is not HTTP/2 compatible...)
+      #errors.add(:base, "Virus detected")
     end
   end
 end
